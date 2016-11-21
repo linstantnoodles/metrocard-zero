@@ -36,11 +36,10 @@ public class ExampleUnitTest {
 
     @Test
     public void LeavesZeroBalance_isCorrect() {
-        assertEquals(true, DisplayMessageActivity.leavesZeroBalance(22.30));
-        assertEquals(true, DisplayMessageActivity.leavesZeroBalance(27.25));
-        assertEquals(true, DisplayMessageActivity.leavesZeroBalance(49.55));
-        assertEquals(true, DisplayMessageActivity.leavesZeroBalance(54.50));
-        assertEquals(true, DisplayMessageActivity.leavesZeroBalance(71.85));
+        assertEquals(true, DisplayMessageActivity.leavesZeroBalance(11.00));
+        assertEquals(true, DisplayMessageActivity.leavesZeroBalance(35.75));
+        assertEquals(true, DisplayMessageActivity.leavesZeroBalance(60.50));
+        assertEquals(true, DisplayMessageActivity.leavesZeroBalance(66.00));
         assertEquals(false, DisplayMessageActivity.leavesZeroBalance(10));
         assertEquals(false, DisplayMessageActivity.leavesZeroBalance(15));
         assertEquals(false, DisplayMessageActivity.leavesZeroBalance(20));
@@ -62,12 +61,13 @@ public class ExampleUnitTest {
     @Test
     public void amountsToAddForNoRemainderFromNonZero() {
         ArrayList<Double> amts = new ArrayList<Double>();
-        amts.add(1.75);
-        amts.add(21.30);
-        amts.add(26.25);
-        amts.add(48.55);
-        amts.add(53.50);
-        amts.add(70.85);
-        assertEquals(amts, DisplayMessageActivity.amountsToAddForNoRemainder(1, 73.00));
+        amts.add(2.45);
+        amts.add(5.2);
+        amts.add(19.55);
+        amts.add(24.50);
+        amts.add(41.85);
+        amts.add(46.80);
+        amts.add(69.10);
+        assertEquals(amts, DisplayMessageActivity.amountsToAddForNoRemainder(0.3, 80.00));
     }
 }

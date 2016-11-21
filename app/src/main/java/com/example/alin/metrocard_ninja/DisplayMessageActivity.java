@@ -1,15 +1,21 @@
 package com.example.alin.metrocard_ninja;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -25,67 +31,47 @@ public class DisplayMessageActivity extends AppCompatActivity {
         Intent intent = getIntent();
         double remaining = Double.parseDouble(intent.getStringExtra(MainActivity.EXTRA_MESSAGE));
         ArrayList<Double> wow = DisplayMessageActivity.amountsToAddForNoRemainder(remaining, 80);
-
-        TableLayout layout = (TableLayout) findViewById(R.id.activity_display_message);
-        TableRow tbrow0 = new TableRow(this);
-        TextView tv0 = new TextView(this);
-        tv0.setText("Refill Amt");
-        tv0.setTextColor(Color.BLACK);
-        tbrow0.addView(tv0);
-        TextView tv1 = new TextView(this);
-        tv1.setText(" Bonus Amt ");
-        tv1.setTextColor(Color.BLACK);
-        tbrow0.addView(tv1);
-        TextView tv2 = new TextView(this);
-        tv2.setText(" Rides ");
-        tv2.setTextColor(Color.BLACK);
-        tbrow0.addView(tv2);
-        TextView tv3 = new TextView(this);
-        tv3.setText(" Total Balance ");
-        tv3.setTextColor(Color.BLACK);
-        tbrow0.addView(tv3);
-        TextView tv4 = new TextView(this);
-        tv4.setText(" Ending Balance ");
-        tv4.setTextColor(Color.BLACK);
-        tbrow0.addView(tv4);
-
-        layout.addView(tbrow0);
-
+        LinearLayout layout = (LinearLayout) findViewById(R.id.result_layout);
         NumberFormat formatter = new DecimalFormat("#0.00");
 
+        TextView tv0 = (TextView) findViewById(R.id.result_message);
+
+        tv0.setText(Html.fromHtml("You have <span style='color:#00933C'>$" +  formatter.format(remaining) + "</span> left on your card. To end up with a <span style='color:#00933C'>$0.00</span> balance, you can add ..."));
+        tv0.setTextColor(Color.BLACK);
+
         for (Double d : wow) {
-            TableRow row = new TableRow(this);
-            TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT);
-            row.setLayoutParams(lp);
+            String refill_amt = formatter.format(d);
+            double bonus = DisplayMessageActivity.bonusValue(d);
+            String bonusText = formatter.format(bonus);
+            double total = remaining + d + DisplayMessageActivity.bonusValue(d);
+            String totalText = formatter.format(total);
+            int rides = DisplayMessageActivity.numberOfRides(DisplayMessageActivity.round_to_tenths(total));
+            String ridesText = rides + "";
 
-            TextView v1 = new TextView(this);
-            v1.setGravity(Gravity.CENTER);
-            v1.setText("$" + formatter.format(d));
-            row.addView(v1);
+            TextView v = new TextView(this);
+            Resources r = getResources();
+            float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, r.getDisplayMetrics());
+            v.setPadding((int) px, 0, 0, 15);
+            v.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22);
 
-            TextView v2 = new TextView(this);
-            v2.setGravity(Gravity.CENTER);
-            v2.setText("$" + formatter.format(DisplayMessageActivity.bonusValue(d)));
-            row.addView(v2);
+            String text = "<span style='color:#00933C'>$"+ refill_amt + "</span> to your card for a total of <span style='color:#00933C'>$"+ totalText +"</span>";
+            if (bonus > 0.0) {
+                text += " (<span style='color:#00933C'>$" + bonusText + " </span> <span style='color:#FCCC0A'>bonus</span>)";
+            }
 
-            TextView v3 = new TextView(this);
-            v3.setGravity(Gravity.CENTER);
-            int num = DisplayMessageActivity.numberOfRides(DisplayMessageActivity.round_to_tenths(remaining + d));
-            v3.setText(num + "");
-            row.addView(v3);
+            if (rides > 0) {
+                text += " and exactly <span style='color:#0039A6'>" + ridesText + "</span>";
+                if (rides > 1) {
+                    text += " rides.";
+                } else {
+                    text += " ride.";
+                }
+            } else {
+                text += " which will give you no rides :(";
+            }
 
-            TextView v4 = new TextView(this);
-            v4.setGravity(Gravity.CENTER);
-            double total = DisplayMessageActivity.round_to_tenths(remaining + d);
-            v4.setText("$" + formatter.format(total));
-            row.addView(v4);
-
-            TextView v5 = new TextView(this);
-            v5.setGravity(Gravity.CENTER);
-            v5.setText("$0.00");
-            row.addView(v5);
-
-            layout.addView(row);
+            v.setText(Html.fromHtml(text));
+            layout.addView(v);
         }
     }
 
@@ -96,10 +82,14 @@ public class DisplayMessageActivity extends AppCompatActivity {
 
     public static ArrayList<Double> amountsToAddForNoRemainder(double remaining, double spend_amt) {
         double increment = 0.05;
+        double maximum = 80.0;
+        remaining = DisplayMessageActivity.round_to_tenths(remaining);
         ArrayList<Double> amounts = new ArrayList<>();
         for (double i = 0; i <= spend_amt; i += increment) {
-            double curr_amt = DisplayMessageActivity.round_to_tenths(remaining + i);
-            if (DisplayMessageActivity.leavesZeroBalance(curr_amt)) {
+            i = DisplayMessageActivity.round_to_tenths(i);
+            double bonus = DisplayMessageActivity.bonusValue(i);
+            double curr_amt = DisplayMessageActivity.round_to_tenths(remaining + i + bonus);
+            if (DisplayMessageActivity.leavesZeroBalance(curr_amt) && curr_amt <= maximum) {
                 amounts.add(DisplayMessageActivity.round_to_tenths(i));
             }
         }
@@ -108,8 +98,7 @@ public class DisplayMessageActivity extends AppCompatActivity {
 
     public static boolean leavesZeroBalance(double amt) {
         double fare = 2.75;
-        double total = DisplayMessageActivity.round_to_tenths((amt + DisplayMessageActivity.bonusValue(amt)));
-        return total % fare == 0;
+        return amt % fare == 0;
     }
 
     public static double round_to_tenths(double value) {
