@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Metrocard Ninja</string>
+    <string name="edit_message">0.00</string>
+    <string name="button_send">Calculate</string>
+</resources>
