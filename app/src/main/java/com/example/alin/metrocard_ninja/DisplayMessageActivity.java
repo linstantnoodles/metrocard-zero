@@ -35,9 +35,9 @@ public class DisplayMessageActivity extends AppCompatActivity {
         NumberFormat formatter = new DecimalFormat("#0.00");
 
         TextView tv0 = (TextView) findViewById(R.id.result_message);
-
         tv0.setText(Html.fromHtml("You have <span style='color:#00933C'>$" +  formatter.format(remaining) + "</span> left on your card. To end up with a <span style='color:#00933C'>$0.00</span> balance, you can add ..."));
         tv0.setTextColor(Color.BLACK);
+        tv0.setBackgroundColor(Color.parseColor("#FCCC0A"));
 
         for (Double d : wow) {
             String refill_amt = formatter.format(d);
@@ -51,10 +51,10 @@ public class DisplayMessageActivity extends AppCompatActivity {
             TextView v = new TextView(this);
             Resources r = getResources();
             float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, r.getDisplayMetrics());
-            v.setPadding((int) px, 0, 0, 15);
+            v.setPadding((int) px, 0, (int) px, 15);
             v.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22);
 
-            String text = "<span style='color:#00933C'>$"+ refill_amt + "</span> to your card for a total of <span style='color:#00933C'>$"+ totalText +"</span>";
+            String text = "<strong><span style='color:#00933C;'>$"+ refill_amt + "</span></strong> to your card for a total of <span style='color:#00933C'>$"+ totalText +"</span>";
             if (bonus > 0.0) {
                 text += " (<span style='color:#00933C'>$" + bonusText + " </span> <span style='color:#FCCC0A'>bonus</span>)";
             }
